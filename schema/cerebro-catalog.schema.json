@@ -1,0 +1,156 @@
+{
+  "$schema": "https://json-schema.org/draft/2019-09/schema",
+  "$id": "https://github.com/CowboyLogic/cerebro-schema/schema/cerebro-catalog.schema.json",
+  "title": "Cerebro Catalog",
+  "description": "Schema for cerebro-catalog.yaml — the Cerebro artifact registry format consumed by all Cerebro suite tools (CLI, VS Code, Visual Studio, IntelliJ).",
+  "type": "object",
+  "required": ["cerebro", "artifacts"],
+  "additionalProperties": false,
+  "properties": {
+    "cerebro": {
+      "type": "string",
+      "const": "1",
+      "description": "Schema version. Must be '1'."
+    },
+    "name": {
+      "type": "string",
+      "maxLength": 100,
+      "description": "Optional display name for this catalog or repository."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Optional description of this catalog."
+    },
+    "artifacts": {
+      "type": "array",
+      "description": "List of installable artifacts in this catalog.",
+      "items": { "$ref": "#/$defs/Artifact" }
+    },
+    "sets": {
+      "type": "array",
+      "description": "Named collections of artifacts that can be installed together in one operation.",
+      "items": { "$ref": "#/$defs/ArtifactSet" }
+    }
+  },
+  "$defs": {
+    "Artifact": {
+      "type": "object",
+      "required": ["id", "name", "type", "compatibility"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+          "description": "Unique identifier for this artifact within the catalog. Lowercase slug (a-z, 0-9, hyphens). Example: 'skill-creator'."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Human-readable display name. Example: 'Skill Creator'."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Short description shown in search results."
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "skill",
+            "agent",
+            "prompt",
+            "instruction",
+            "snippet",
+            "workflow",
+            "mcp-server",
+            "hook",
+            "other"
+          ],
+          "description": "Artifact type classification."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Optional metadata tags for filtering and discovery."
+        },
+        "compatibility": {
+          "type": "array",
+          "minItems": 1,
+          "description": "List of tool+scope+files entries describing where and how this artifact installs.",
+          "items": { "$ref": "#/$defs/CompatibilityEntry" }
+        }
+      }
+    },
+    "CompatibilityEntry": {
+      "type": "object",
+      "required": ["tool", "scope", "files"],
+      "additionalProperties": false,
+      "properties": {
+        "tool": {
+          "type": "string",
+          "enum": ["copilot", "claude-code", "opencode", "visual-studio", "intellij"],
+          "description": "The AI tool this entry targets."
+        },
+        "scope": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "enum": ["workspace", "global"]
+          },
+          "description": "Supported installation scopes. 'workspace' installs into the current project; 'global' installs into the user's home config directory."
+        },
+        "files": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/ArtifactFile" },
+          "description": "Files or directories to install for this tool+scope combination."
+        }
+      }
+    },
+    "ArtifactFile": {
+      "type": "object",
+      "required": ["source", "target"],
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "type": "string",
+          "description": "Path to the file or directory within the source repository. If a directory, the full subtree is mirrored to 'target'."
+        },
+        "target": {
+          "type": "string",
+          "description": "Relative install path on the user's machine. For workspace scope, relative to workspace root. For global scope, relative to the user's home directory. Must not contain '..' or begin with '/'."
+        }
+      }
+    },
+    "ArtifactSet": {
+      "type": "object",
+      "required": ["id", "name", "artifacts"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
+          "description": "Unique identifier for this set. Lowercase slug."
+        },
+        "name": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "Human-readable display name for this set."
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500,
+          "description": "Optional description of what this set includes and why."
+        },
+        "artifacts": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" },
+          "description": "List of artifact IDs (from this catalog's 'artifacts' array) to include in this set."
+        }
+      }
+    }
+  }
+}
