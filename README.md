@@ -57,4 +57,4 @@ See [CONTRIBUTING.md](https://github.com/CowboyLogic/cerebro/blob/main/CONTRIBUT
 
 ## License
 
-MIT
+Apache 2.0
