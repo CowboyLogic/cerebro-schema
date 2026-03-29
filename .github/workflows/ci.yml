@@ -10,8 +10,12 @@ on:
 
 jobs:
   build:
-    name: Build & Test
-    runs-on: ubuntu-latest
+    name: Build & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
 
     steps:
       - name: Checkout
@@ -31,3 +35,16 @@ jobs:
 
       - name: Test
         run: npm test --if-present
+
+  ci:
+    name: Build & Test
+    needs: build
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: All matrix legs passed
+        run: |
+          if [ "${{ needs.build.result }}" != "success" ]; then
+            echo "Matrix result: ${{ needs.build.result }}"
+            exit 1
+          fi
