@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2019-09/schema",
   "$id": "https://github.com/CowboyLogic/cerebro-schema/schema/cerebro-catalog.schema.json",
   "title": "Cerebro Catalog",
-  "description": "Schema for cerebro-catalog.yaml — the Cerebro artifact registry format consumed by all Cerebro suite tools (CLI, VS Code, Visual Studio, IntelliJ).",
+  "description": "Schema for cerebro-catalog.yaml — the Cerebro artifact registry format. Repo owners drop this file in their repository root to make their artifacts discoverable and installable via Cerebro.",
   "type": "object",
   "required": ["cerebro", "artifacts"],
   "additionalProperties": false,
@@ -24,6 +24,7 @@
     },
     "artifacts": {
       "type": "array",
+      "minItems": 1,
       "description": "List of installable artifacts in this catalog.",
       "items": { "$ref": "#/$defs/Artifact" }
     },
@@ -36,91 +37,64 @@
   "$defs": {
     "Artifact": {
       "type": "object",
-      "required": ["id", "name", "type", "compatibility"],
+      "required": ["id", "name", "type", "source"],
       "additionalProperties": false,
       "properties": {
         "id": {
           "type": "string",
           "pattern": "^[a-z0-9][a-z0-9-]*[a-z0-9]$",
-          "description": "Unique identifier for this artifact within the catalog. Lowercase slug (a-z, 0-9, hyphens). Example: 'skill-creator'."
+          "description": "Unique identifier for this artifact within the catalog. Lowercase slug (a-z, 0-9, hyphens only; cannot start or end with a hyphen). Example: 'git-commit-assistant'."
         },
         "name": {
           "type": "string",
           "maxLength": 100,
-          "description": "Human-readable display name. Example: 'Skill Creator'."
+          "description": "Human-readable display name. Example: 'Git Commit Assistant'."
         },
         "description": {
           "type": "string",
           "maxLength": 500,
-          "description": "Short description shown in search results."
+          "description": "Short description shown in the Cerebro item list."
         },
         "type": {
           "type": "string",
           "enum": [
             "skill",
-            "agent",
-            "prompt",
             "instruction",
+            "prompt",
+            "agent",
+            "hook",
+            "mcp-server",
             "snippet",
             "workflow",
-            "mcp-server",
-            "hook",
             "other"
           ],
-          "description": "Artifact type classification."
+          "description": "Artifact type classification. MVP-supported: 'skill', 'instruction'. All others are valid in the catalog but require a future Cerebro release to install."
         },
-        "tags": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "Optional metadata tags for filtering and discovery."
-        },
-        "compatibility": {
-          "type": "array",
-          "minItems": 1,
-          "description": "List of tool+scope+files entries describing where and how this artifact installs.",
-          "items": { "$ref": "#/$defs/CompatibilityEntry" }
-        }
-      }
-    },
-    "CompatibilityEntry": {
-      "type": "object",
-      "required": ["tool", "scope", "files"],
-      "additionalProperties": false,
-      "properties": {
-        "tool": {
+        "source": {
           "type": "string",
-          "enum": ["copilot", "claude-code", "opencode", "visual-studio", "intellij"],
-          "description": "The AI tool this entry targets."
+          "pattern": "^(?![\\/])(?![A-Za-z]:)(?!.*(?:^|[\\/])\\.\\.([\\/]|$)).+$",
+          "description": "Path to the artifact's root folder or file within the source repository. For skills: path to the folder containing SKILL.md. For instructions: path to the .instructions.md file. Must be a relative path; must not contain '..', begin with '/', begin with '\\', or use a Windows drive prefix. Examples: 'skills/git-commit-assistant/' or 'instructions/python.instructions.md'."
         },
-        "scope": {
+        "supports": {
           "type": "array",
           "minItems": 1,
           "items": {
             "type": "string",
-            "enum": ["workspace", "global"]
+            "enum": [
+              "agents",
+              "claude-code",
+              "copilot",
+              "cursor",
+              "windsurf",
+              "opencode"
+            ]
           },
-          "description": "Supported installation scopes. 'workspace' installs into the current project; 'global' installs into the user's home config directory."
+          "description": "Tools this artifact is compatible with. If omitted, the artifact is assumed compatible with all supported targets. Cerebro will only install to a target present in both this list and the user's selected target."
         },
-        "files": {
+        "tags": {
           "type": "array",
-          "minItems": 1,
-          "items": { "$ref": "#/$defs/ArtifactFile" },
-          "description": "Files or directories to install for this tool+scope combination."
-        }
-      }
-    },
-    "ArtifactFile": {
-      "type": "object",
-      "required": ["source", "target"],
-      "additionalProperties": false,
-      "properties": {
-        "source": {
-          "type": "string",
-          "description": "Path to the file or directory within the source repository. If a directory, the full subtree is mirrored to 'target'."
-        },
-        "target": {
-          "type": "string",
-          "description": "Relative install path on the user's machine. For workspace scope, relative to workspace root. For global scope, relative to the user's home directory. Must not contain '..' or begin with '/'."
+          "items": { "type": "string", "maxLength": 50 },
+          "description": "Optional metadata tags for filtering and discovery."
         }
       }
     },
