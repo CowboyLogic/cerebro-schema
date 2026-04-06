@@ -72,7 +72,8 @@
         },
         "source": {
           "type": "string",
-          "description": "Path to the artifact's root folder or file within the source repository. For skills: path to the folder containing SKILL.md. For instructions: path to the .instructions.md file. Must be a relative path; must not contain '..' or begin with '/'. Examples: 'skills/git-commit-assistant/' or 'instructions/python.instructions.md'."
+          "pattern": "^(?![\\/])(?![A-Za-z]:)(?!.*(?:^|[\\/])\\.\\.([\\/]|$)).+$",
+          "description": "Path to the artifact's root folder or file within the source repository. For skills: path to the folder containing SKILL.md. For instructions: path to the .instructions.md file. Must be a relative path; must not contain '..', begin with '/', begin with '\\', or use a Windows drive prefix. Examples: 'skills/git-commit-assistant/' or 'instructions/python.instructions.md'."
         },
         "supports": {
           "type": "array",

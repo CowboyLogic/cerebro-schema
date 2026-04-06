@@ -52,6 +52,12 @@ jobs:
             --title "v${{ steps.version.outputs.version }}" \
             --notes "${{ inputs.release_notes }}"
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
       - name: Publish to npm
         run: npm publish --access public
         env:

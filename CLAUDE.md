@@ -23,7 +23,7 @@ The `prepare` script (`tsc`) runs automatically during `npm install` / `npm ci` 
 ## Package Exports
 
 ```typescript
-import type { Catalog, Artifact } from '@cowboylogic/cerebro-schema';       // types only
+import type { CerebroCatalog, Artifact } from '@cowboylogic/cerebro-schema'; // types only
 import { validateCatalog } from '@cowboylogic/cerebro-schema/validate';      // AJV validator
 ```
 

@@ -13,7 +13,7 @@ Single source of truth for the Cerebro artifact catalog format. All Cerebro prod
 
 ```typescript
 // Types only (no AJV runtime cost)
-import type { Catalog, Artifact, ArtifactTarget } from '@cowboylogic/cerebro-schema';
+import type { CerebroCatalog, Artifact, ToolId } from '@cowboylogic/cerebro-schema';
 
 // Validation (includes AJV)
 import { validateCatalog } from '@cowboylogic/cerebro-schema/validate';
@@ -29,27 +29,21 @@ name: my-repo         # optional display name
 description: "..."    # optional
 
 artifacts:
-  - name: code-review              # required; lowercase, hyphens
+  - id: code-review                # required; lowercase, a-z0-9 and hyphens, no leading/trailing hyphen
+    name: Code Review              # required; display name, max 100 chars
     type: agent                    # required — see valid types below
-    description: "..."             # optional, max 200 chars
-    files:
-      - agents/code-review.md      # required; relative paths, no ..
-    targets:                       # optional; inferred from type if omitted
+    source: agents/code-review.md  # required; relative path, no .., no leading /
+    description: "..."             # optional, max 500 chars
+    supports:                      # optional; omit to allow all targets
       - claude-code
-      - opencode
+      - copilot
     tags:
       - review
 ```
 
-**Valid `type` values:** `skill`, `agent`, `prompt`, `instruction`, `hook`, `mcp-server`, `unknown`
+**Valid `type` values:** `skill`, `instruction`, `prompt`, `agent`, `hook`, `mcp-server`, `snippet`, `workflow`, `other`
 
-**Valid `targets`:** `claude-code`, `opencode`, `vscode`, `copilot`
-
-## Adding a New Artifact Type
-
-1. Add the literal to the `ArtifactType` union in `src/types.ts`
-2. Update `schema/cerebro-catalog.schema.json` — add to the `type` enum
-3. Update `src/validate.ts` if any new validation rules are needed
+**Valid `supports` values (ToolId):** `agents`, `claude-code`, `copilot`, `cursor`, `windsurf`, `opencode`
 4. Rebuild: `npm run build`
 5. Bump the minor version in `package.json` (new types are non-breaking additions)
 

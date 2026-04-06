@@ -10,13 +10,13 @@ This file, `CLAUDE.md`, and `.agents/skills/` files are **living documents** for
 
 ## Non-Negotiable Rules
 
-1. **This package is the single source of truth.** Types, schema, and validation logic live here. Do not copy or redefine `Artifact`, `Catalog`, `ArtifactType`, or related types in other repos.
+1. **This package is the single source of truth.** Types, schema, and validation logic live here. Do not copy or redefine `Artifact`, `CerebroCatalog`, `ArtifactType`, or related types in other repos.
 
 2. **CommonJS output is intentional.** `"module": "CommonJS"` in tsconfig is required for VS Code extension host compatibility. Do not change without coordinating with `cerebro-vscode-ext`.
 
 3. **Both exports must stay clean.** The `@cowboylogic/cerebro-schema` export provides types with no runtime cost. The `/validate` export adds AJV. Do not bleed AJV into the main export.
 
-4. **Security applies to validation.** `validateCatalog()` must reject catalogs with path-traversal attempts (`..`), absolute paths in `files`, or oversized inputs. Do not relax validation without a documented reason.
+4. **Security applies to validation.** `validateCatalog()` must reject catalogs with path-traversal attempts (`..`), absolute paths in `source`, or oversized inputs. The `source` field pattern in the JSON Schema enforces this at the schema level. Do not relax validation without a documented reason.
 
 ---
 
@@ -24,7 +24,7 @@ This file, `CLAUDE.md`, and `.agents/skills/` files are **living documents** for
 
 ```
 src/
-  index.ts       # Re-exports: Catalog, Artifact, ArtifactType, ArtifactTarget, etc.
+  index.ts       # Re-exports: CerebroCatalog, Artifact, ArtifactSet, ArtifactType, ToolId, Scope
   types.ts       # TypeScript types derived from the JSON Schema
   validate.ts    # AJV-based validateCatalog() — imports from ajv/dist/2019
 
