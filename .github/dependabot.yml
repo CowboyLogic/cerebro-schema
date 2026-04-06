@@ -8,6 +8,11 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
+    ignore:
+      # @types/node version should track engines.node (>=20), anchored at v22 LTS.
+      # Major bumps beyond v22 risk introducing types for APIs unavailable on Node 20.
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
